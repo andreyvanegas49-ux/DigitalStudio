@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Studio - Postproducción & Diseño Multimedia</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <!-- Canvas para el fondo interactivo 3D -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Header / Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <i data-lucide="clapperboard"></i>
+            <span>DIGITAL<span class="highlight">STUDIO</span></span>
+        </div>
+        <nav class="nav-links">
+            <a href="#inicio">Inicio</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#nosotros">Nosotros</a>
+            <a href="#contacto" class="btn-nav">Contacto</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+        <div class="hero-content">
+            <span class="badge">Especialistas en Postproducción</span>
+            <h1>Potenciamos tu visión audiovisual</h1>
+            <p>Transformamos tus ideas en experiencias visuales de alto impacto con edición de video, motion graphics y retouching profesional.</p>
+            <div class="hero-buttons">
+                <a href="#servicios" class="btn btn-primary">Explorar Servicios</a>
+                <a href="https://wa.me/1234567890?text=Hola,%20quisiera%20solicitar%20una%20cotización" target="_blank" class="btn btn-secondary">
+                    <i data-lucide="message-circle"></i> Cotizar por WhatsApp
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios Section -->
+    <section id="servicios" class="services-section">
+        <h2 class="section-title">Nuestros Servicios</h2>
+        <p class="section-subtitle">Soluciones creativas a la medida de tu proyecto</p>
+
+        <div class="services-grid">
+            <!-- Servicio 1 -->
+            <div class="service-card" onclick="openModal('Edición de Video', 'Servicio profesional de montaje, corrección de color, ritmos dinámicos y adaptación a formatos 4K y Redes Sociales.')">
+                <div class="icon-box"><i data-lucide="video"></i></div>
+                <h3>Edición de Video</h3>
+                <p>Montaje, corrección de color y formato para redes sociales o cine/4K.</p>
+                <button class="card-btn">Saber más <i data-lucide="arrow-right"></i></button>
+            </div>
+
+            <!-- Servicio 2 -->
+            <div class="service-card" onclick="openModal('Retoque Digital', 'Eliminación de imperfecciones, composición avanzada, montaje fotográfico e iluminación para campañas publicitarias.')">
+                <div class="icon-box"><i data-lucide="image"></i></div>
+                <h3>Retoque Digital</h3>
+                <p>Fotomontaje, aislamiento de producto, retoque de piel e iluminación.</p>
+                <button class="card-btn">Saber más <i data-lucide="arrow-right"></i></button>
+            </div>
+
+            <!-- Servicio 3 -->
+            <div class="service-card" onclick="openModal('Motion Graphics', 'Animación 2D y 3D de elementos gráficos, logotipos animaciones tipográficas e intros publicitarias.')">
+                <div class="icon-box"><i data-lucide="sparkles"></i></div>
+                <h3>Motion Graphics</h3>
+                <p>Animación 2D/3D, intros, títulos y piezas dinámicas publicitarias.</p>
+                <button class="card-btn">Saber más <i data-lucide="arrow-right"></i></button>
+            </div>
+
+            <!-- Servicio 4 -->
+            <div class="service-card" onclick="openModal('Producción de Audio', 'Limpieza de sonido, reducción de ruido, mezcla, masterización y diseño sonoro para podcasts y videos.')">
+                <div class="icon-box"><i data-lucide="headphones"></i></div>
+                <h3>Producción de Audio</h3>
+                <p>Limpieza de voz, edición de podcast, mezcla y masterización.</p>
+                <button class="card-btn">Saber más <i data-lucide="arrow-right"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para detalle de servicio -->
+    <div id="service-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3 id="modal-title">Título del Servicio</h3>
+            <p id="modal-description">Descripción detallada...</p>
+            <a id="modal-whatsapp-link" href="#" target="_blank" class="btn btn-primary btn-modal">
+                <i data-lucide="message-circle"></i> Cotizar este servicio
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Digital Studio. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
