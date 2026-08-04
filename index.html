@@ -4,589 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Studio | Producción Multimedia y Edición</title>
-    <!-- Three.js para renderizado 3D -->
+    
+    <!-- Hoja de estilos externa -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Librería Three.js para el fondo 3D -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        html {
-            scroll-behavior: smooth;
-        }
-
-        :root {
-            --bg-card: rgba(10, 18, 30, 0.85); 
-            --accent-primary: #00f2fe;
-            --accent-secondary: #4facfe;
-            --accent-mint: #38ef7d;
-            --text-main: #f8fafc; 
-            --text-muted: #94a3b8; 
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background-color: #030712;
-            color: var(--text-main);
-            line-height: 1.6;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* CANVAS 3D DE FONDO */
-        #webgl-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* CAPA DE AMBIENTE CINEMATOGRÁFICO */
-        .cinema-glow {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: 
-                radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.12), transparent 45%),
-                radial-gradient(circle at 90% 80%, rgba(56, 239, 125, 0.1), transparent 45%),
-                radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.95), #030712);
-        }
-
-        /* CAPA DE TEXTURA DE GRAIN CINEMATOGRÁFICO */
-        .noise-texture {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.035;
-            pointer-events: none;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-
-        /* HEADER */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 6%;
-            background: rgba(3, 7, 18, 0.8);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(0, 242, 254, 0.15);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
-        }
-
-        .logo-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, #00f2fe, #3b82f6);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .logo-wrapper:hover .logo-icon {
-            transform: rotate(10deg) scale(1.05);
-        }
-
-        .logo-icon svg {
-            width: 22px;
-            height: 22px;
-            fill: #030712;
-        }
-
-        .logo {
-            font-weight: 900;
-            font-size: 1.6rem;
-            text-transform: uppercase;
-            letter-spacing: 2.5px;
-            background: linear-gradient(135deg, #00f2fe 0%, #38ef7d 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 12px rgba(0, 242, 254, 0.2));
-        }
-
-        nav {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        nav a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            padding: 0.6rem 1.4rem;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-        nav a:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(0, 242, 254, 0.3);
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
-        }
-
-        nav a.nav-btn-highlight {
-            background: rgba(56, 239, 125, 0.1);
-            color: #38ef7d;
-            border: 1px solid rgba(56, 239, 125, 0.4);
-            box-shadow: 0 0 12px rgba(56, 239, 125, 0.15);
-        }
-
-        nav a.nav-btn-highlight:hover {
-            background: linear-gradient(135deg, #38ef7d, #00f2fe);
-            color: #030712;
-            border-color: transparent;
-            box-shadow: 0 0 20px rgba(56, 239, 125, 0.4);
-        }
-
-        /* HERO SECTION */
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 1.5rem;
-            position: relative;
-        }
-
-        .hero-tag {
-            display: inline-block;
-            padding: 6px 18px;
-            border-radius: 30px;
-            background: rgba(56, 239, 125, 0.08);
-            border: 1px solid rgba(56, 239, 125, 0.3);
-            color: var(--accent-mint);
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 0 15px rgba(56, 239, 125, 0.15);
-            backdrop-filter: blur(8px);
-        }
-
-        .hero h1 {
-            font-size: 3.8rem;
-            max-width: 950px;
-            margin-bottom: 1.5rem;
-            line-height: 1.15;
-            color: #ffffff;
-            font-weight: 900;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.8);
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #00f2fe, #38ef7d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            color: #cbd5e1;
-            max-width: 680px;
-            margin-bottom: 2.5rem;
-            font-weight: 400;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 1.2rem;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #00f2fe, #3b82f6);
-            color: #030712;
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: transform 0.2s, box-shadow 0.3s;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 242, 254, 0.3);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.5);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
-            padding: 1rem 2.2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #00f2fe;
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
-            transform: translateY(-3px);
-        }
-
-        .hero-trust {
-            margin-top: 3rem;
-            font-size: 0.9rem;
-            color: #94a3b8;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: rgba(10, 18, 30, 0.6);
-            padding: 8px 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-        }
-
-        .hero-trust span {
-            color: #f8fafc;
-            font-weight: 600;
-        }
-
-        /* SECCIONES */
-        section {
-            padding: 7rem 5% 4rem;
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.8rem;
-            margin-bottom: 3.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #ffffff;
-            font-weight: 900;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        /* TARJETAS MULTIMEDIA GLASS */
-        .card {
-            background: rgba(10, 18, 30, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 2.5rem 2rem;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 242, 254, 0.15);
-            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.15), transparent);
-            transition: 0.5s;
-        }
-
-        .card:hover::before {
-            left: 100%;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(0, 242, 254, 0.6);
-            box-shadow: 0 15px 35px rgba(0, 242, 254, 0.25);
-        }
-
-        .card-icon {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-
-        .card:hover .card-icon {
-            transform: scale(1.1);
-            border-color: #38ef7d;
-        }
-
-        .card-icon svg {
-            width: 32px;
-            height: 32px;
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.4));
-        }
-
-        .card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #f8fafc;
-        }
-
-        .card p {
-            color: #cbd5e1;
-            font-size: 0.95rem;
-        }
-
-        .card-hint {
-            display: inline-block;
-            margin-top: 1.2rem;
-            font-size: 0.85rem;
-            color: #00f2fe;
-            font-weight: 600;
-        }
-
-        /* MODAL */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(3, 7, 18, 0.92);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            padding: 1.5rem;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background: #0d1424;
-            border: 1px solid rgba(0, 242, 254, 0.25);
-            border-radius: 24px;
-            padding: 2.5rem;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 242, 254, 0.2);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-            position: relative;
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1.2rem;
-            right: 1.5rem;
-            background: transparent;
-            border: none;
-            color: #94a3b8;
-            font-size: 1.8rem;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .modal-close:hover {
-            color: #00f2fe;
-        }
-
-        .modal-title {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #00f2fe, #38ef7d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .modal-body h4 {
-            color: #f8fafc;
-            margin: 1.2rem 0 0.5rem;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .modal-body ul {
-            list-style: none;
-            padding-left: 0;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-body ul li {
-            position: relative;
-            padding-left: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #94a3b8;
-            font-size: 0.95rem;
-        }
-
-        .modal-body ul li::before {
-            content: "▹";
-            position: absolute;
-            left: 0;
-            color: #00f2fe;
-            font-weight: bold;
-        }
-
-        .modal-body p {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        /* CONTACTO */
-        .contact-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(10, 18, 30, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .contact-container p {
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-            color: #cbd5e1;
-        }
-
-        .btn-whatsapp {
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            color: white;
-            padding: 1.2rem 2.5rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: transform 0.2s, box-shadow 0.3s;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
-        }
-
-        .btn-whatsapp:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.5);
-            color: white;
-        }
-
-        .whatsapp-icon {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
-
-        /* FOOTER */
-        footer {
-            text-align: center;
-            padding: 3rem 1rem;
-            background: rgba(3, 7, 18, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            color: #94a3b8;
-            font-size: 0.9rem;
-            margin-top: 5rem;
-        }
-
-        .footer-logo {
-            font-weight: 800;
-            background: linear-gradient(90deg, #00f2fe, #38ef7d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        @media (max-width: 768px) {
-            header { padding: 1rem 4%; }
-            .hero h1 { font-size: 2.4rem; }
-            .hero p { font-size: 1rem; }
-            .hero-actions { flex-direction: column; width: 100%; }
-            .btn, .btn-secondary { width: 100%; }
-            .logo { font-size: 1.2rem; }
-            nav a { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
-            section { padding-top: 5rem; }
-            .modal-content { padding: 1.8rem; }
-        }
-    </style>
 </head>
 <body>
 
@@ -605,6 +28,7 @@
         </a>
         <nav>
             <a href="#servicios">Servicios</a>
+            <a href="#portafolio">Portafolio</a>
             <a href="#contacto" class="nav-btn-highlight">Contacto</a>
         </nav>
     </header>
@@ -624,6 +48,7 @@
         </div>
     </section>
 
+    <!-- SECCIÓN DE SERVICIOS -->
     <section class="services" id="servicios">
         <h2 class="section-title">Nuestros Servicios</h2>
         
@@ -703,6 +128,73 @@
         </div>
     </section>
 
+    <!-- SECCIÓN PORTAFOLIO -->
+    <section id="portafolio">
+        <h2 class="section-title">Nuestros Trabajos</h2>
+
+        <!-- Filtros de Categorías -->
+        <div class="portfolio-filters">
+            <button class="filter-btn active" onclick="filterPortfolio('all', event)">Todos</button>
+            <button class="filter-btn" onclick="filterPortfolio('video', event)">Videos</button>
+            <button class="filter-btn" onclick="filterPortfolio('foto', event)">Retoque Foto</button>
+            <button class="filter-btn" onclick="filterPortfolio('motion', event)">Motion Graphics</button>
+        </div>
+
+        <!-- Galería de Proyectos -->
+        <div class="portfolio-grid">
+            
+            <!-- Proyecto 1: Video -->
+            <div class="portfolio-card" data-category="video">
+                <div class="portfolio-thumb">
+                    <span class="portfolio-badge">Video 4K</span>
+                    <div class="play-overlay">▶</div>
+                </div>
+                <div class="portfolio-info">
+                    <h3>Comercial Publicitario 4K</h3>
+                    <p>Edición, corrección de color y diseño sonoro para campaña de marca.</p>
+                </div>
+            </div>
+
+            <!-- Proyecto 2: Foto -->
+            <div class="portfolio-card" data-category="foto">
+                <div class="portfolio-thumb">
+                    <span class="portfolio-badge badge-mint">Retoque</span>
+                    <div class="play-overlay">✦</div>
+                </div>
+                <div class="portfolio-info">
+                    <h3>Fotografía de Producto E-commerce</h3>
+                    <p>Aislamiento, sustitución de fondo y retoque avanzado de iluminación.</p>
+                </div>
+            </div>
+
+            <!-- Proyecto 3: Motion -->
+            <div class="portfolio-card" data-category="motion">
+                <div class="portfolio-thumb">
+                    <span class="portfolio-badge badge-blue">Motion 3D</span>
+                    <div class="play-overlay">▶</div>
+                </div>
+                <div class="portfolio-info">
+                    <h3>Intro Animada de Marca</h3>
+                    <p>Animación 3D de logotipo y efectos visuales cinematográficos.</p>
+                </div>
+            </div>
+
+            <!-- Proyecto 4: Video -->
+            <div class="portfolio-card" data-category="video">
+                <div class="portfolio-thumb">
+                    <span class="portfolio-badge">Reels / Shorts</span>
+                    <div class="play-overlay">▶</div>
+                </div>
+                <div class="portfolio-info">
+                    <h3>Contenido Dinámico para Redes</h3>
+                    <p>Edición vertical en formato 9:16 con subtítulos animados y ritmo rápido.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Modal para Servicios -->
     <div class="modal-overlay" id="serviceModal" onclick="closeModalOnOuterClick(event)">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">&times;</button>
@@ -714,6 +206,7 @@
         </div>
     </div>
 
+    <!-- Contacto -->
     <section id="contacto">
         <h2 class="section-title">Hablemos</h2>
         <div class="contact-container">
@@ -733,202 +226,7 @@
         <p>&copy; 2026 <span class="footer-logo">Digital Studio</span>. Todos los derechos reservados.</p>
     </footer>
 
-    <script>
-        const servicesData = {
-            video: {
-                title: "Edición de Video Profesional",
-                description: "Llevamos tu material audiovisual al siguiente nivel mediante técnicas avanzadas de montaje, ritmo narrativo y acabado cinematográfico.",
-                includes: [
-                    "Corte, sincronización y estructura narrativa",
-                    "Corrección y gradación de color (Color Grading)",
-                    "Diseño sonoro y mezcla de audio básico",
-                    "Titulación y subtítulos dinámicos",
-                    "Formatos optimizados para Redes Sociales (9:16) o Horizontal (16:9)"
-                ],
-                deliverables: "Video final en MP4/ProRes 1080p o 4K + adaptaciones requeridas.",
-                wspMsg: "¡Hola! Quisiera cotizar el servicio de Edición de Video."
-            },
-            foto: {
-                title: "Retoque Digital & Fotomontaje",
-                description: "Mejoramos y perfeccionamos tus imágenes fotográficas para campañas publicitarias, catálogos e-commerce o presencia de marca.",
-                includes: [
-                    "Limpieza y retoque de piel/imperfecciones",
-                    "Ajustes de iluminación, contraste y balance de blancos",
-                    "Aislamiento de producto y sustitución de fondos",
-                    "Fotomontaje e integración de elementos visuales",
-                    "Estandarización de color corporativo"
-                ],
-                deliverables: "Archivos TIFF/PNG de alta resolución para impresión y versiones optimizadas para web.",
-                wspMsg: "¡Hola! Quisiera cotizar el servicio de Retoque Digital."
-            },
-            motion: {
-                title: "Motion Graphics & Animación",
-                description: "Damos vida a tus elementos gráficos para comunicar ideas complejas de forma rápida, visual y llamativa.",
-                includes: [
-                    "Animación de logotipos 2D/3D (Intros / Outros)",
-                    "Lower Thirds y títulos animados",
-                    "Infografías y explicadores animados",
-                    "Composición de efectos visuales (VFX)",
-                    "Animaciones en bucle para contenido social"
-                ],
-                deliverables: "Archivos de video en alta definición o animaciones con canal alfa (fondo transparente).",
-                wspMsg: "¡Hola! Quisiera cotizar el servicio de Motion Graphics."
-            },
-            audio: {
-                title: "Producción & Edición de Audio",
-                description: "Optimizamos la calidad sonora de tu contenido para lograr una experiencia auditiva limpia, profesional y envolvente.",
-                includes: [
-                    "Limpieza de ruido de fondo, ecos y pops",
-                    "Edición y corte de voz para Podcasts o entrevistas",
-                    "Ecualización, compresión y balance de frecuencias",
-                    "Diseño de sonido y musicalización estratégica",
-                    "Masterización final según estándares de plataformas digitales"
-                ],
-                deliverables: "Master final en formato WAV de alta fidelidad y MP3 optimizado.",
-                wspMsg: "¡Hola! Quisiera cotizar el servicio de Producción de Audio."
-            }
-        };
-
-        function openModal(serviceKey) {
-            const data = servicesData[serviceKey];
-            if (!data) return;
-
-            document.getElementById('modalTitle').innerText = data.title;
-            
-            let htmlContent = `<p>${data.description}</p>`;
-            htmlContent += `<h4>¿Qué incluye este servicio?</h4><ul>`;
-            data.includes.forEach(item => {
-                htmlContent += `<li>${item}</li>`;
-            });
-            htmlContent += `</ul>`;
-            htmlContent += `<h4>Entregables:</h4><p>${data.deliverables}</p>`;
-
-            document.getElementById('modalBody').innerHTML = htmlContent;
-            
-            const wspBtn = document.getElementById('modalWspBtn');
-            const encodedMsg = encodeURIComponent(data.wspMsg);
-            wspBtn.href = `https://wa.me/573205558829?text=${encodedMsg}`;
-
-            document.getElementById('serviceModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('serviceModal').classList.remove('active');
-        }
-
-        function closeModalOnOuterClick(e) {
-            if (e.target.classList.contains('modal-overlay')) {
-                closeModal();
-            }
-        }
-    </script>
-
-    <!-- SCRIPT 3D TEMÁTICO: PRODUCCIÓN MULTIMEDIA (FILM STRIPS, RENDER NODES & AUDIO WAVE) -->
-    <script>
-        const canvas = document.getElementById('webgl-bg');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        camera.position.z = 12;
-
-        // 1. CINTAS CINEMATOGRÁFICAS FLUIDAS (35mm FILM STRIPS)
-        function createFilmStrip(colorVal, radiusOffset) {
-            const curve = new THREE.CatmullRomCurve3([
-                new THREE.Vector3(-14, -5 + radiusOffset, -2),
-                new THREE.Vector3(-6, 4 - radiusOffset, 2),
-                new THREE.Vector3(2, -3 + radiusOffset, -1),
-                new THREE.Vector3(10, 5 - radiusOffset, 3),
-                new THREE.Vector3(16, -2 + radiusOffset, -2)
-            ]);
-
-            const geometry = new THREE.TubeGeometry(curve, 100, 0.25, 8, false);
-            const material = new THREE.MeshBasicMaterial({
-                color: colorVal,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.35
-            });
-
-            const mesh = new THREE.Mesh(geometry, material);
-            scene.add(mesh);
-            return mesh;
-        }
-
-        const filmStrip1 = createFilmStrip(0x00f2fe, 0);
-        const filmStrip2 = createFilmStrip(0x38ef7d, 2.5);
-
-        // 2. NODOS DE EDICIÓN / COMPOSICIÓN (RENDER NODES)
-        const nodeGroup = new THREE.Group();
-        const nodeCount = 35;
-        const nodePositions = [];
-
-        for(let i = 0; i < nodeCount; i++) {
-            const x = (Math.random() - 0.5) * 24;
-            const y = (Math.random() - 0.5) * 16;
-            const z = (Math.random() - 0.5) * 8;
-
-            nodePositions.push(new THREE.Vector3(x, y, z));
-
-            // Punto / Nodo visual
-            const dotGeo = new THREE.SphereGeometry(0.08, 8, 8);
-            const dotMat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0x00f2fe : 0x38ef7d });
-            const dotMesh = new THREE.Mesh(dotGeo, dotMat);
-            dotMesh.position.set(x, y, z);
-            nodeGroup.add(dotMesh);
-        }
-
-        // Conexiones de líneas entre nodos cercanos
-        const lineMat = new THREE.LineBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.15 });
-        const lineGeo = new THREE.BufferGeometry();
-        const pointsArr = [];
-
-        for(let i = 0; i < nodeCount; i++) {
-            for(let j = i + 1; j < nodeCount; j++) {
-                if(nodePositions[i].distanceTo(nodePositions[j]) < 5) {
-                    pointsArr.push(nodePositions[i].x, nodePositions[i].y, nodePositions[i].z);
-                    pointsArr.push(nodePositions[j].x, nodePositions[j].y, nodePositions[j].z);
-                }
-            }
-        }
-
-        lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(pointsArr, 3));
-        const linesMesh = new THREE.LineSegments(lineGeo, lineMat);
-        nodeGroup.add(linesMesh);
-        scene.add(nodeGroup);
-
-        // Bucle de Animación
-        let clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const elapsedTime = clock.getElapsedTime();
-
-            // Rotación suave de las cintas
-            filmStrip1.rotation.y = Math.sin(elapsedTime * 0.2) * 0.1;
-            filmStrip1.rotation.z = Math.cos(elapsedTime * 0.15) * 0.05;
-
-            filmStrip2.rotation.y = -Math.sin(elapsedTime * 0.18) * 0.1;
-            filmStrip2.rotation.z = -Math.cos(elapsedTime * 0.12) * 0.05;
-
-            // Movimiento flotante de nodos
-            nodeGroup.rotation.y = elapsedTime * 0.03;
-            nodeGroup.rotation.x = Math.sin(elapsedTime * 0.02) * 0.05;
-
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        // Responsive Resizing
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+    <!-- Script JS externo -->
+    <script src="script.js"></script>
 </body>
 </html>
