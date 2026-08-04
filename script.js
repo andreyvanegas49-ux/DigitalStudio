@@ -1,9 +1,8 @@
-// Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('section');
   const navLinks = document.querySelectorAll('.nav-menu a');
 
-  // Resalta el enlace activo según la sección visible al hacer scroll
+  // Remarca el enlace activo en la barra de navegación según la sección en pantalla
   window.addEventListener('scroll', () => {
     let currentSection = '';
 
