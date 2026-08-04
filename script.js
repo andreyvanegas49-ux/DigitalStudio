@@ -1,4 +1,5 @@
-
+// DATOS DE LOS SERVICIOS Y LÓGICA DE MODALES
+const servicesData = {
     video: {
         title: "Edición de Video Profesional",
         description: "Llevamos tu material audiovisual al siguiente nivel mediante técnicas avanzadas de montaje, ritmo narrativo y acabado cinematográfico.",
@@ -126,14 +127,11 @@ const filmStrip2 = createFilmStrip(0x38ef7d, 2.5);
 // 2. NODOS DE EDICIÓN / COMPOSICIÓN (RENDER NODES)
 const nodeGroup = new THREE.Group();
 const nodeCount = 35;
-const nodePositions = [];
 
 for(let i = 0; i < nodeCount; i++) {
     const x = (Math.random() - 0.5) * 24;
     const y = (Math.random() - 0.5) * 16;
     const z = (Math.random() - 0.5) * 8;
-
-    nodePositions.push(new THREE.Vector3(x, y, z));
 
     const dotGeo = new THREE.SphereGeometry(0.08, 12, 12);
     const dotMat = new THREE.MeshBasicMaterial({
