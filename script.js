@@ -1,5 +1,4 @@
-// DATOS DE LOS SERVICIOS Y LÓGICA DE MODALES
-const servicesData = {
+
     video: {
         title: "Edición de Video Profesional",
         description: "Llevamos tu material audiovisual al siguiente nivel mediante técnicas avanzadas de montaje, ritmo narrativo y acabado cinematográfico.",
