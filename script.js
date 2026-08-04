@@ -88,6 +88,24 @@ function closeModalOnOuterClick(e) {
     }
 }
 
+// FILTRADO DEL PORTAFOLIO POR CATEGORÍA
+function filterPortfolio(category, evt) {
+    const buttons = document.querySelectorAll('.filter-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    if (evt && evt.target) {
+        evt.target.classList.add('active');
+    }
+
+    const cards = document.querySelectorAll('.portfolio-card');
+    cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
 // INICIALIZACIÓN DE LA ESCENA 3D CON THREE.JS
 const canvas = document.getElementById('webgl-bg');
 const scene = new THREE.Scene();
@@ -99,7 +117,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 camera.position.z = 12;
 
-// 1. CINTAS CINEMATOGRÁFICAS FLUIDAS (35mm FILM STRIPS)
+// 1. CINTAS CINEMATOGRÁFICAS FLUIDAS
 function createFilmStrip(colorVal, radiusOffset) {
     const curve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(-14, -5 + radiusOffset, -2),
@@ -137,7 +155,6 @@ for(let i = 0; i < nodeCount; i++) {
 
     nodePositions.push(new THREE.Vector3(x, y, z));
 
-    // Punto / Nodo visual
     const dotGeo = new THREE.SphereGeometry(0.08, 8, 8);
     const dotMat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0x00f2fe : 0x38ef7d });
     const dotMesh = new THREE.Mesh(dotGeo, dotMat);
@@ -145,7 +162,7 @@ for(let i = 0; i < nodeCount; i++) {
     nodeGroup.add(dotMesh);
 }
 
-// Conexiones de líneas entre nodos cercanos
+// Conexiones de líneas entre nodos
 const lineMat = new THREE.LineBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.15 });
 const lineGeo = new THREE.BufferGeometry();
 const pointsArr = [];
@@ -171,14 +188,12 @@ function animate() {
     requestAnimationFrame(animate);
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotación de las cintas
     filmStrip1.rotation.y = Math.sin(elapsedTime * 0.2) * 0.1;
     filmStrip1.rotation.z = Math.cos(elapsedTime * 0.15) * 0.05;
 
     filmStrip2.rotation.y = -Math.sin(elapsedTime * 0.18) * 0.1;
     filmStrip2.rotation.z = -Math.cos(elapsedTime * 0.12) * 0.05;
 
-    // Movimiento flotante de nodos
     nodeGroup.rotation.y = elapsedTime * 0.03;
     nodeGroup.rotation.x = Math.sin(elapsedTime * 0.02) * 0.05;
 
