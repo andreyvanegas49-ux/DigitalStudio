@@ -1,4 +1,7 @@
-// DATA DE SERVICIOS PARA EL MODAL
+/* =========================================================
+   1. LÓGICA DE DATOS Y MODALES INTERACTIVOS
+   ========================================================= */
+
 const servicesData = {
     video: {
         title: "Edición de Video Profesional",
@@ -54,13 +57,13 @@ const servicesData = {
     }
 };
 
-// LÓGICA DEL MODAL INTERACTIVO
 function openModal(serviceKey) {
     const data = servicesData[serviceKey];
     if (!data) return;
 
     document.getElementById('modalTitle').innerText = data.title;
     
+    // Inserción correcta mediante backticks (Template Literals)
     let htmlContent = `<p>${data.description}</p>`;
     htmlContent += `<h4>¿Qué incluye este servicio?</h4><ul>`;
     data.includes.forEach(item => {
@@ -88,7 +91,11 @@ function closeModalOnOuterClick(e) {
     }
 }
 
-// INICIALIZACIÓN DE LA ESCENA 3D CON THREE.JS
+
+/* =========================================================
+   2. RENDERING 3D CON THREE.JS (FONDO DINÁMICO)
+   ========================================================= */
+
 const canvas = document.getElementById('webgl-bg');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -99,7 +106,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 camera.position.z = 12;
 
-// 1. CINTAS CINEMATOGRÁFICAS FLUIDAS (35mm FILM STRIPS)
+// Generar cintas de celuloide/film
 function createFilmStrip(colorVal, radiusOffset) {
     const curve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(-14, -5 + radiusOffset, -2),
@@ -125,69 +132,44 @@ function createFilmStrip(colorVal, radiusOffset) {
 const filmStrip1 = createFilmStrip(0x00f2fe, 0);
 const filmStrip2 = createFilmStrip(0x38ef7d, 2.5);
 
-// 2. NODOS DE EDICIÓN / COMPOSICIÓN (RENDER NODES)
+// Nodos de partículas de renderizado
 const nodeGroup = new THREE.Group();
-const nodeCount = 35;
-const nodePositions = [];
+const nodeCount = 30;
+const dotGeo = new THREE.SphereGeometry(0.08, 16, 16);
+const dotMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.7 });
 
-for(let i = 0; i < nodeCount; i++) {
-    const x = (Math.random() - 0.5) * 24;
-    const y = (Math.random() - 0.5) * 16;
-    const z = (Math.random() - 0.5) * 8;
-
-    nodePositions.push(new THREE.Vector3(x, y, z));
-
-    // Punto / Nodo visual
-    const dotGeo = new THREE.SphereGeometry(0.08, 8, 8);
-    const dotMat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0x00f2fe : 0x38ef7d });
-    const dotMesh = new THREE.Mesh(dotGeo, dotMat);
-    dotMesh.position.set(x, y, z);
-    nodeGroup.add(dotMesh);
+for (let i = 0; i < nodeCount; i++) {
+    const dot = new THREE.Mesh(dotGeo, dotMat);
+    dot.position.set(
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 12,
+        (Math.random() - 0.5) * 6
+    );
+    nodeGroup.add(dot);
 }
-
-// Conexiones de líneas entre nodos cercanos
-const lineMat = new THREE.LineBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.15 });
-const lineGeo = new THREE.BufferGeometry();
-const pointsArr = [];
-
-for(let i = 0; i < nodeCount; i++) {
-    for(let j = i + 1; j < nodeCount; j++) {
-        if(nodePositions[i].distanceTo(nodePositions[j]) < 5) {
-            pointsArr.push(nodePositions[i].x, nodePositions[i].y, nodePositions[i].z);
-            pointsArr.push(nodePositions[j].x, nodePositions[j].y, nodePositions[j].z);
-        }
-    }
-}
-
-lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(pointsArr, 3));
-const linesMesh = new THREE.LineSegments(lineGeo, lineMat);
-nodeGroup.add(linesMesh);
 scene.add(nodeGroup);
 
-// BUCLE DE ANIMACIÓN
+// Loop de animación
 let clock = new THREE.Clock();
 
 function animate() {
     requestAnimationFrame(animate);
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotación de las cintas
     filmStrip1.rotation.y = Math.sin(elapsedTime * 0.2) * 0.1;
     filmStrip1.rotation.z = Math.cos(elapsedTime * 0.15) * 0.05;
 
     filmStrip2.rotation.y = -Math.sin(elapsedTime * 0.18) * 0.1;
     filmStrip2.rotation.z = -Math.cos(elapsedTime * 0.12) * 0.05;
 
-    // Movimiento flotante de nodos
     nodeGroup.rotation.y = elapsedTime * 0.03;
-    nodeGroup.rotation.x = Math.sin(elapsedTime * 0.02) * 0.05;
 
     renderer.render(scene, camera);
 }
 
 animate();
 
-// AJUSTE RESPONSIVO
+// Responsividad del Canvas 3D
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
