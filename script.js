@@ -1,7 +1,4 @@
-/* =========================================================
-   1. DATOS DE LOS SERVICIOS Y LÓGICA DE MODAL
-   ========================================================= */
-
+// DATA DE SERVICIOS PARA EL MODAL
 const servicesData = {
     video: {
         title: "Edición de Video Profesional",
@@ -57,18 +54,12 @@ const servicesData = {
     }
 };
 
+// LÓGICA DEL MODAL INTERACTIVO
 function openModal(serviceKey) {
     const data = servicesData[serviceKey];
     if (!data) return;
 
-    const modalTitle = document.getElementById('modalTitle');
-    const modalBody = document.getElementById('modalBody');
-    const modalWspBtn = document.getElementById('modalWspBtn');
-    const modal = document.getElementById('serviceModal');
-
-    if (!modalTitle || !modalBody || !modal) return;
-
-    modalTitle.innerText = data.title;
+    document.getElementById('modalTitle').innerText = data.title;
     
     let htmlContent = `<p>${data.description}</p>`;
     htmlContent += `<h4>¿Qué incluye este servicio?</h4><ul>`;
@@ -78,19 +69,17 @@ function openModal(serviceKey) {
     htmlContent += `</ul>`;
     htmlContent += `<h4>Entregables:</h4><p>${data.deliverables}</p>`;
 
-    modalBody.innerHTML = htmlContent;
+    document.getElementById('modalBody').innerHTML = htmlContent;
     
-    if (modalWspBtn) {
-        const encodedMsg = encodeURIComponent(data.wspMsg);
-        modalWspBtn.href = `https://wa.me/573205558829?text=${encodedMsg}`;
-    }
+    const wspBtn = document.getElementById('modalWspBtn');
+    const encodedMsg = encodeURIComponent(data.wspMsg);
+    wspBtn.href = `https://wa.me/573205558829?text=${encodedMsg}`;
 
-    modal.classList.add('active');
+    document.getElementById('serviceModal').classList.add('active');
 }
 
 function closeModal() {
-    const modal = document.getElementById('serviceModal');
-    if (modal) modal.classList.remove('active');
+    document.getElementById('serviceModal').classList.remove('active');
 }
 
 function closeModalOnOuterClick(e) {
@@ -99,96 +88,108 @@ function closeModalOnOuterClick(e) {
     }
 }
 
+// INICIALIZACIÓN DE LA ESCENA 3D CON THREE.JS
+const canvas = document.getElementById('webgl-bg');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
 
-/* =========================================================
-   2. RENDERING 3D CON THREE.JS (FONDO DINÁMICO)
-   ========================================================= */
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-document.addEventListener("DOMContentLoaded", () => {
-    const canvas = document.getElementById('webgl-bg');
+camera.position.z = 12;
 
-    // Validación por si Three.js no carga desde el CDN o el canvas no existe
-    if (!canvas || typeof THREE === 'undefined') {
-        console.warn("Three.js no se ha cargado o el canvas no existe. Se usará el fondo CSS alternativo.");
-        return;
+// 1. CINTAS CINEMATOGRÁFICAS FLUIDAS (35mm FILM STRIPS)
+function createFilmStrip(colorVal, radiusOffset) {
+    const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-14, -5 + radiusOffset, -2),
+        new THREE.Vector3(-6, 4 - radiusOffset, 2),
+        new THREE.Vector3(2, -3 + radiusOffset, -1),
+        new THREE.Vector3(10, 5 - radiusOffset, 3),
+        new THREE.Vector3(16, -2 + radiusOffset, -2)
+    ]);
+
+    const geometry = new THREE.TubeGeometry(curve, 100, 0.25, 8, false);
+    const material = new THREE.MeshBasicMaterial({
+        color: colorVal,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.35
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+    return mesh;
+}
+
+const filmStrip1 = createFilmStrip(0x00f2fe, 0);
+const filmStrip2 = createFilmStrip(0x38ef7d, 2.5);
+
+// 2. NODOS DE EDICIÓN / COMPOSICIÓN (RENDER NODES)
+const nodeGroup = new THREE.Group();
+const nodeCount = 35;
+const nodePositions = [];
+
+for(let i = 0; i < nodeCount; i++) {
+    const x = (Math.random() - 0.5) * 24;
+    const y = (Math.random() - 0.5) * 16;
+    const z = (Math.random() - 0.5) * 8;
+
+    nodePositions.push(new THREE.Vector3(x, y, z));
+
+    // Punto / Nodo visual
+    const dotGeo = new THREE.SphereGeometry(0.08, 8, 8);
+    const dotMat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0x00f2fe : 0x38ef7d });
+    const dotMesh = new THREE.Mesh(dotGeo, dotMat);
+    dotMesh.position.set(x, y, z);
+    nodeGroup.add(dotMesh);
+}
+
+// Conexiones de líneas entre nodos cercanos
+const lineMat = new THREE.LineBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.15 });
+const lineGeo = new THREE.BufferGeometry();
+const pointsArr = [];
+
+for(let i = 0; i < nodeCount; i++) {
+    for(let j = i + 1; j < nodeCount; j++) {
+        if(nodePositions[i].distanceTo(nodePositions[j]) < 5) {
+            pointsArr.push(nodePositions[i].x, nodePositions[i].y, nodePositions[i].z);
+            pointsArr.push(nodePositions[j].x, nodePositions[j].y, nodePositions[j].z);
+        }
     }
+}
 
-    try {
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(pointsArr, 3));
+const linesMesh = new THREE.LineSegments(lineGeo, lineMat);
+nodeGroup.add(linesMesh);
+scene.add(nodeGroup);
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// BUCLE DE ANIMACIÓN
+let clock = new THREE.Clock();
 
-        camera.position.z = 12;
+function animate() {
+    requestAnimationFrame(animate);
+    const elapsedTime = clock.getElapsedTime();
 
-        function createFilmStrip(colorVal, radiusOffset) {
-            const curve = new THREE.CatmullRomCurve3([
-                new THREE.Vector3(-14, -5 + radiusOffset, -2),
-                new THREE.Vector3(-6, 4 - radiusOffset, 2),
-                new THREE.Vector3(2, -3 + radiusOffset, -1),
-                new THREE.Vector3(10, 5 - radiusOffset, 3),
-                new THREE.Vector3(16, -2 + radiusOffset, -2)
-            ]);
+    // Rotación de las cintas
+    filmStrip1.rotation.y = Math.sin(elapsedTime * 0.2) * 0.1;
+    filmStrip1.rotation.z = Math.cos(elapsedTime * 0.15) * 0.05;
 
-            const geometry = new THREE.TubeGeometry(curve, 100, 0.25, 8, false);
-            const material = new THREE.MeshBasicMaterial({
-                color: colorVal,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.35
-            });
+    filmStrip2.rotation.y = -Math.sin(elapsedTime * 0.18) * 0.1;
+    filmStrip2.rotation.z = -Math.cos(elapsedTime * 0.12) * 0.05;
 
-            const mesh = new THREE.Mesh(geometry, material);
-            scene.add(mesh);
-            return mesh;
-        }
+    // Movimiento flotante de nodos
+    nodeGroup.rotation.y = elapsedTime * 0.03;
+    nodeGroup.rotation.x = Math.sin(elapsedTime * 0.02) * 0.05;
 
-        const filmStrip1 = createFilmStrip(0x00f2fe, 0);
-        const filmStrip2 = createFilmStrip(0x38ef7d, 2.5);
+    renderer.render(scene, camera);
+}
 
-        const nodeGroup = new THREE.Group();
-        const nodeCount = 30;
-        const dotGeo = new THREE.SphereGeometry(0.08, 16, 16);
-        const dotMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.7 });
+animate();
 
-        for (let i = 0; i < nodeCount; i++) {
-            const dot = new THREE.Mesh(dotGeo, dotMat);
-            dot.position.set(
-                (Math.random() - 0.5) * 20,
-                (Math.random() - 0.5) * 12,
-                (Math.random() - 0.5) * 6
-            );
-            nodeGroup.add(dot);
-        }
-        scene.add(nodeGroup);
-
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const elapsedTime = clock.getElapsedTime();
-
-            filmStrip1.rotation.y = Math.sin(elapsedTime * 0.2) * 0.1;
-            filmStrip1.rotation.z = Math.cos(elapsedTime * 0.15) * 0.05;
-
-            filmStrip2.rotation.y = -Math.sin(elapsedTime * 0.18) * 0.1;
-            filmStrip2.rotation.z = -Math.cos(elapsedTime * 0.12) * 0.05;
-
-            nodeGroup.rotation.y = elapsedTime * 0.03;
-
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    } catch (err) {
-        console.error("Error inicializando WebGL 3D:", err);
-    }
+// AJUSTE RESPONSIVO
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
