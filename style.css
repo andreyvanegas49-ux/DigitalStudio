@@ -52,7 +52,7 @@ body {
         radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.95), #030712);
 }
 
-/* TEXTURA CINEMATOGRÁFICA DE GRANO */
+/* CAPA DE TEXTURA DE GRAIN CINEMATOGRÁFICO */
 .noise-texture {
     position: fixed;
     top: 0;
@@ -308,7 +308,7 @@ section {
     gap: 2rem;
 }
 
-/* TARJETAS GLASS */
+/* TARJETAS MULTIMEDIA GLASS */
 .card {
     background: rgba(10, 18, 30, 0.8);
     backdrop-filter: blur(20px);
