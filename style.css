@@ -38,7 +38,7 @@ body {
     pointer-events: none;
 }
 
-/* CAPA DE AMBIENTE CINEMATOGRÁFICO DE RESPALDO */
+/* CAPA DE AMBIENTE CINEMATOGRÁFICO */
 .cinema-glow {
     position: fixed;
     top: 0;
@@ -52,6 +52,7 @@ body {
         radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.95), #030712);
 }
 
+/* TEXTURA CINEMATOGRÁFICA DE GRANO */
 .noise-texture {
     position: fixed;
     top: 0;
@@ -161,13 +162,13 @@ nav a.nav-btn-highlight:hover {
 
 /* HERO SECTION */
 .hero {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 8rem 1.5rem 4rem;
+    padding: 0 1.5rem;
     position: relative;
 }
 
